@@ -1,15 +1,30 @@
-"use client"
+"use client";
 
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-
+import { useEffect, useState } from "react";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 interface GlobalConfigPanelProps {
-  globalPrompt: string
-  setGlobalPrompt: (prompt: string) => void
+  globalPrompt: string;
+  setGlobalPrompt: (prompt: string) => void;
 }
 
-export function GlobalConfigPanel({ globalPrompt, setGlobalPrompt }: GlobalConfigPanelProps) {
+export function GlobalConfigPanel({
+  globalPrompt,
+  setGlobalPrompt,
+}: GlobalConfigPanelProps) {
+  const [localPrompt, setLocalPrompt] = useState(globalPrompt);
+
+  useEffect(() => {
+    setLocalPrompt(globalPrompt);
+  }, [globalPrompt])
+
+  const handleSave = () => {
+    setGlobalPrompt(localPrompt);
+    toast("Global configuration saved");
+  };
+
   return (
     <div className="p-6 space-y-6">
       <h2 className="text-xl font-semibold">Global Configuration</h2>
@@ -19,8 +34,8 @@ export function GlobalConfigPanel({ globalPrompt, setGlobalPrompt }: GlobalConfi
           <Label htmlFor="global-prompt">Global System Prompt</Label>
           <Textarea
             id="global-prompt"
-            value={globalPrompt}
-            onChange={(e) => setGlobalPrompt(e.target.value)}
+            value={localPrompt}
+            onChange={(e) => setLocalPrompt(e.target.value)}
             className="min-h-[300px]"
             placeholder="Enter the global system prompt for your agent. This will be used as the base context for all states."
           />
@@ -30,9 +45,10 @@ export function GlobalConfigPanel({ globalPrompt, setGlobalPrompt }: GlobalConfi
           </p>
         </div>
 
-        <Button className="w-full">Save Global Configuration</Button>
+        <Button className="w-full" onClick={handleSave} type="button">
+          Save Global Configuration
+        </Button>
       </div>
     </div>
-  )
+  );
 }
-
