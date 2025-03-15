@@ -14,12 +14,14 @@ interface StateConfigPanelProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateNodeData: (nodeId: string, data: any) => void;
   nodes: Node[];
+  deleteNode: (nodeId: string) => void;
 }
 
 export function StateConfigPanel({
   node,
   updateNodeData,
   nodes,
+  deleteNode,
 }: StateConfigPanelProps) {
   const [label, setLabel] = useState(node.data.label);
   const [prompt, setPrompt] = useState(node.data.prompt);
@@ -90,11 +92,27 @@ export function StateConfigPanel({
     });
   };
 
+  const handleDelete = () => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete the state "${node.data.label}"? This action cannot be undone.`
+      )
+    ) {
+      deleteNode(node.id);
+      toast("State deleted", {
+        description: "The state has been removed from your flow.",
+      });
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 text-gray-900">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">State Configuration</h2>
-        <button className="p-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200">
+        <button
+          className="p-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200"
+          onClick={handleDelete}
+        >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>

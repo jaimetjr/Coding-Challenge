@@ -142,6 +142,41 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
     [setNodes, selectedNode],
   )
 
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      // Remove all edges connected to this node
+      setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId))
+
+      // Remove the node
+      setNodes((nds) => nds.filter((node) => node.id !== nodeId))
+
+      // If the deleted node was selected, clear the selection
+      if (selectedNode && selectedNode.id === nodeId) {
+        setSelectedNode(null)
+      }
+
+      // If the deleted node was the current state in test mode, reset current state
+      if (currentState === nodeId) {
+        // Find a new state to set as current (preferably the starting state)
+        const startingNode = nodes.find((node) => node.data.isStartingState && node.id !== nodeId)
+        if (startingNode) {
+          setCurrentState(startingNode.id)
+        } else if (nodes.length > 1) {
+          // If no starting state, set the first node that's not being deleted
+          const firstNode = nodes.find((node) => node.id !== nodeId)
+          if (firstNode) {
+            setCurrentState(firstNode.id)
+          } else {
+            setCurrentState(null)
+          }
+        } else {
+          setCurrentState(null)
+        }
+      }
+    },
+    [setNodes, setEdges, selectedNode, currentState, nodes],
+  )
+
   const saveFlow = () => {
     // Validate that there is a starting state
     const hasStartingState = nodes.some((node) => node.data.isStartingState)
@@ -312,7 +347,7 @@ export default function BuilderPage({ params }: { params: { id: string } }) {
             {showGlobalConfig ? (
               <GlobalConfigPanel globalPrompt={globalPrompt} setGlobalPrompt={setGlobalPrompt} />
             ) : selectedNode ? (
-              <StateConfigPanel node={selectedNode} updateNodeData={updateNodeData} nodes={nodes} />
+              <StateConfigPanel node={selectedNode} updateNodeData={updateNodeData} nodes={nodes} deleteNode={deleteNode} />
             ) : (
               <div className="p-6 text-center text-gray-500">
                 <p>Select a state to configure or add a new state to get started.</p>
